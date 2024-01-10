@@ -5,15 +5,19 @@ from PIL import Image
 import json
 import pickle
 
+from src.dataCollectionTool.paint.paintGUI import PaintGUI
+
 
 class SymbolTab:
 
     def __init__(self, top_content: ctk.CTkFrame, bottom_content: ctk.CTkFrame, root):
 
         self.root = root
-        self.top_content = ctk.CTkFrame(top_content)
-        self.bottom_content = ctk.CTkFrame(bottom_content)
-        self.plus_symbol_button: ctk.CTkButton | None = None
+        self.root_top_content = top_content
+        self.root_bottom_content = bottom_content
+
+        self.top_content = None
+        self.bottom_content = None
         self.img_label: ctk.CTkLabel | None = None
 
         self.directory = "../data/symbols/symbols"
@@ -38,6 +42,8 @@ class SymbolTab:
             self.symbols = []
 
     def set_top_content(self):
+
+        self.top_content = ctk.CTkFrame(self.root_top_content)
 
         for i in range(6):
             self.top_content.columnconfigure(i, weight=1)
@@ -65,19 +71,20 @@ class SymbolTab:
             if len(self.symbols) < 6:
                 symbol_button.grid(pady=100)
 
-        self.plus_symbol_button = ctk.CTkButton(self.top_content, text="+", fg_color="green",
-                                                command=self.add_symbol)
-        self.plus_symbol_button.grid(row=len(self.symbols) // 6, column=len(self.symbols) % 6, sticky="nsew", padx=10,
+        plus_symbol_button = ctk.CTkButton(self.top_content, text="+", fg_color="green",
+                                                command=self.add_new_symbol)
+        plus_symbol_button.grid(row=len(self.symbols) // 6, column=len(self.symbols) % 6, sticky="nsew", padx=10,
                                      pady=10)
 
         if len(self.symbols) < 6:
-            self.plus_symbol_button.grid(pady=100)
+            plus_symbol_button.grid(pady=100)
 
     def clear_top_content(self):
-        self.top_content.grid_forget()
-        self.plus_symbol_button.destroy()
+        self.top_content.destroy()
 
     def set_bottom_content(self):
+
+        self.bottom_content = ctk.CTkFrame(self.root_bottom_content)
 
         self.bottom_content.columnconfigure(0, weight=3)
         self.bottom_content.columnconfigure(1, weight=1)
@@ -87,8 +94,8 @@ class SymbolTab:
 
         symbol_name = self.selected_symbol
 
-        if self.img_label is not None:
-            self.img_label.destroy()
+        # if self.img_label is not None:
+        #     self.img_label.destroy()
 
         try:
             img = Image.open(self.directory_with_images + "/" + symbol_name + ".png")
@@ -104,9 +111,19 @@ class SymbolTab:
         self.set_config_buttons()
 
     def clear_bottom_content(self):
-        self.bottom_content.grid_forget()
+        self.bottom_content.destroy()
 
     def set_config_buttons(self):
+
+        def change_script(choice):
+
+            with open(self.directory_with_info + "/" + self.selected_symbol + ".json", 'r') as file:
+
+                symbol_info = json.load(file)
+                symbol_info["script"] = choice
+
+                with open(self.directory_with_info + "/" + self.selected_symbol + ".json", 'w') as f:
+                    json.dump(symbol_info, f)
 
         button_frame = ctk.CTkFrame(self.bottom_content)
         button_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
@@ -114,8 +131,9 @@ class SymbolTab:
         button_frame.columnconfigure(0, weight=1)
         button_frame.rowconfigure(0, weight=1)
         button_frame.rowconfigure(1, weight=2)
-        button_frame.rowconfigure(2, weight=3)
-        button_frame.rowconfigure(3, weight=1)
+        button_frame.rowconfigure(2, weight=2)
+        button_frame.rowconfigure(3, weight=3)
+        button_frame.rowconfigure(4, weight=1)
 
         data = self.find_info(self.selected_symbol)
 
@@ -130,15 +148,30 @@ class SymbolTab:
         drop_label = ctk.CTkLabel(script_frame, text="Wybierz powiązany skrypt: ")
         drop_label.pack()
 
+        refresh_button = ctk.CTkButton(button_frame, text="Odśwież", command=self.refresh)
+        refresh_button.grid(row=2, column=0, sticky="nsew", padx=10, pady=10)
+
         scripts = self.find_all_scripts()
-        drop = ctk.CTkOptionMenu(master=script_frame, values=scripts, height=40, width=200)
+        drop = ctk.CTkOptionMenu(master=script_frame, values=scripts, height=40, width=200,
+                                 command=lambda choice: change_script(choice))
+
+        script_name = self.find_info(self.selected_symbol)['script']
+
+        if script_name in scripts:
+            drop.set(script_name)
+        else:
+            change_script("default.py")
+            drop.set("default.py")
+
         drop.pack()
 
-        add_symbol_button = ctk.CTkButton(button_frame, text="Dodaj więcej symboli")
-        add_symbol_button.grid(row=2, column=0, sticky="nsew", padx=10, pady=10)
+        add_symbol_button = ctk.CTkButton(button_frame, text="Dodaj więcej symboli"
+                                          , command=self.add_more_symbols)
+        add_symbol_button.grid(row=3, column=0, sticky="nsew", padx=10, pady=10)
 
-        delete_button = ctk.CTkButton(button_frame, text="Usuń symbol", fg_color="red")
-        delete_button.grid(row=3, column=0, sticky="nsew", padx=10, pady=10)
+        delete_button = ctk.CTkButton(button_frame, text="Usuń symbol", fg_color="red",
+                                      command=self.delete_symbol)
+        delete_button.grid(row=4, column=0, sticky="nsew", padx=10, pady=10)
 
     def find_all_scripts(self):
 
@@ -157,7 +190,22 @@ class SymbolTab:
 
         return data
 
-    def add_symbol(self):
+    def add_more_symbols(self):
+
+        paint_gui = PaintGUI(self.selected_symbol)
+        paint_gui.start()
+
+    def delete_symbol(self):
+
+        os.remove(self.directory + "/" + self.selected_symbol + ".pkl")
+        os.remove(self.directory_with_info + "/" + self.selected_symbol + ".json")
+
+        if os.path.exists(self.directory_with_images + "/" + self.selected_symbol + ".png"):
+            os.remove(self.directory_with_images + "/" + self.selected_symbol + ".png")
+
+        self.refresh()
+
+    def add_new_symbol(self):
 
         top_level_add_symbol = ctk.CTkToplevel(self.root)
         top_level_add_symbol.title("Nowy Skrypt")
@@ -184,7 +232,7 @@ class SymbolTab:
             with open(self.directory_with_info + "/" + symbol_name + ".json", "w") as f:
                 json.dump({
                     "amount": 0,
-                    "script": None
+                    "script": "default.py"
                 }, f)
 
             self.refresh()
@@ -196,6 +244,7 @@ class SymbolTab:
 
         self.clear_bottom_content()
         self.set_bottom_content()
+        self.bottom_content.pack(fill='both', expand=True, padx=10, pady=10)
 
     def refresh(self):
 
@@ -204,9 +253,11 @@ class SymbolTab:
 
         self.clear_top_content()
         self.set_top_content()
+        self.top_content.pack(fill='both', expand=True, padx=10, pady=10)
 
         self.clear_bottom_content()
         self.set_bottom_content()
+        self.bottom_content.pack(fill='both', expand=True, padx=10, pady=10)
 
     def enable(self):
 

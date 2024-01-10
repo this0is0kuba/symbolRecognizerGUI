@@ -1,4 +1,6 @@
 import customtkinter as ctk
+import os
+import json
 
 from src.GUI.tabs.packTab import PackTab
 from src.GUI.tabs.scriptTab import ScriptTab
@@ -9,6 +11,10 @@ from src.GUI.tabs.tabs import Tab
 class MainPage:
 
     def __init__(self):
+
+        # directories
+        self.directory_to_info = "../data/main.json"
+        self.directory_to_packs = "../data/packs/models"
 
         # main appearance
         ctk.set_appearance_mode('dark')
@@ -68,17 +74,60 @@ class MainPage:
 
     def set_sidebar_buttons(self):
 
-        self.script_configurator_button = ctk.CTkButton(self.sidebar, text="Skrypty",
+        self.script_configurator_button = ctk.CTkButton(self.sidebar, text="Skrypty", height=50,
                                                         command=lambda: self.switch_tab(Tab.SCRIPT_TAB))
-        self.script_configurator_button.pack(pady=(60, 10), fill='both', padx=10)
+        self.script_configurator_button.pack(pady=(60, 15), fill='both', padx=10)
 
-        self.symbol_configurator_button = ctk.CTkButton(self.sidebar, text="Gesty",
+        self.symbol_configurator_button = ctk.CTkButton(self.sidebar, text="Gesty", height=50,
                                                         command=lambda: self.switch_tab(Tab.SYMBOL_TAB))
-        self.symbol_configurator_button.pack(pady=10, fill='both', padx=10)
+        self.symbol_configurator_button.pack(pady=15, fill='both', padx=10)
 
-        self.package_configurator_button = ctk.CTkButton(self.sidebar, text="Pakiety",
+        self.package_configurator_button = ctk.CTkButton(self.sidebar, text="Pakiety", height=50,
                                                          command=lambda: self.switch_tab(Tab.PACK_TAB))
-        self.package_configurator_button.pack(pady=10, fill='both', padx=10)
+        self.package_configurator_button.pack(pady=15, fill='both', padx=10)
+
+        self.set_option_menu()
+
+    def set_option_menu(self):
+
+        def change_main_pack(choice):
+
+            with open(self.directory_to_info, 'r') as file:
+
+                main_info = json.load(file)
+                main_info["selected"] = choice
+
+                with open(self.directory_to_info, 'w') as f:
+                    json.dump(main_info, f)
+
+        packs = self.find_all_packs()
+        main_pack = self.find_main_pack()
+
+        main_pack_label = ctk.CTkLabel(self.sidebar, text="Wybierz twój główny pakiet: ")
+        main_pack_label.pack(padx=10, pady=(30, 5))
+
+        drop = ctk.CTkOptionMenu(master=self.sidebar, values=packs, height=40,
+                                 command=lambda choice: change_main_pack(choice))
+        drop.set(main_pack)
+        drop.pack(padx=10, pady=5)
+
+        start_button = ctk.CTkButton(self.sidebar, text="Uruchom działanie w tle", height=50, fg_color='green')
+        start_button.pack(side=ctk.BOTTOM, pady=50)
+
+
+
+    def find_main_pack(self):
+
+        with open(self.directory_to_info, 'r') as file:
+            main_info = json.load(file)
+            return main_info["selected"]
+
+    def find_all_packs(self):
+
+        if os.path.isdir(self.directory_to_packs):
+            return [pack.split('.')[0] for pack in os.listdir(self.directory_to_packs)]
+        else:
+            return []
 
     def set_top_and_bottom_content(self):
 
@@ -90,7 +139,7 @@ class MainPage:
 
         self.script_tab = ScriptTab(self.top_content, self.bottom_content, self.root)
         self.symbol_tab = SymbolTab(self.top_content, self.bottom_content, self.root)
-        self.pack_tab = PackTab(self.top_content, self.bottom_content)
+        self.pack_tab = PackTab(self.top_content, self.bottom_content, self.root)
 
         self.script_tab.enable()
 

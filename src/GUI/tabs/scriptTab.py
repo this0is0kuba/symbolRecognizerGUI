@@ -12,10 +12,11 @@ class ScriptTab:
     def __init__(self, top_content: ctk.CTkFrame, bottom_content: ctk.CTkFrame, root: ctk.CTk):
 
         self.root = root
+        self.root_top_content = top_content
+        self.root_bottom_content = bottom_content
 
-        self.top_content = ctk.CTkFrame(top_content)
-        self.bottom_content = ctk.CTkFrame(bottom_content)
-        self.plus_script_button: ctk.CTkButton | None = None
+        self.top_content = None
+        self.bottom_content = None
 
         self.directory = "../data/scripts"
         self.scripts = []
@@ -40,6 +41,8 @@ class ScriptTab:
 
     def set_top_content(self):
 
+        self.top_content = ctk.CTkFrame(self.root_top_content)
+
         for i in range(6):
             self.top_content.columnconfigure(i, weight=1)
 
@@ -57,17 +60,18 @@ class ScriptTab:
             if len(self.scripts) < 6:
                 script_button.grid(pady=100)
 
-        self.plus_script_button = ctk.CTkButton(self.top_content, text="+", fg_color="green", command=self.add_script)
-        self.plus_script_button.grid(row=len(self.scripts)//6, column=len(self.scripts) % 6, sticky="nsew", padx=10, pady=10)
+        plus_script_button = ctk.CTkButton(self.top_content, text="+", fg_color="green", command=self.add_script)
+        plus_script_button.grid(row=len(self.scripts)//6, column=len(self.scripts) % 6, sticky="nsew", padx=10, pady=10)
 
         if len(self.scripts) < 6:
-            self.plus_script_button.grid(pady=100)
+            plus_script_button.grid(pady=100)
 
     def clear_top_content(self):
-        self.top_content.grid_forget()
-        self.plus_script_button.destroy()
+        self.top_content.destroy()
 
     def set_bottom_content(self):
+
+        self.bottom_content = ctk.CTkFrame(self.root_bottom_content)
 
         self.bottom_content.columnconfigure(0, weight=3)
         self.bottom_content.columnconfigure(1, weight=1)
@@ -86,7 +90,7 @@ class ScriptTab:
         if script_name is None:
             script_content = ''
         else:
-            file = open(self.directory + "/" + script_name)
+            file = open(self.directory + "/" + script_name, 'r', encoding='utf-8')
             script_content = file.read()
             file.close()
 
@@ -131,8 +135,10 @@ class ScriptTab:
 
         def delete_script():
 
-            os.remove(self.directory + "/" + self.selected_script)
-            self.refresh()
+            if self.selected_script != "default.py":
+
+                os.remove(self.directory + "/" + self.selected_script)
+                self.refresh()
 
     def switch_script(self, clicked_script):
 
@@ -175,6 +181,7 @@ class ScriptTab:
 
         self.clear_top_content()
         self.set_top_content()
+        self.top_content.pack(fill='both', expand=True, padx=10, pady=10)
 
         self.display_script(self.scripts[0])
 
