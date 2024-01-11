@@ -60,7 +60,8 @@ class ScriptTab:
             if len(self.scripts) < 6:
                 script_button.grid(pady=100)
 
-        plus_script_button = ctk.CTkButton(self.top_content, text="+", fg_color="green", command=self.add_script)
+        plus_script_button = ctk.CTkButton(self.top_content, text="+", fg_color="green", command=self.add_script,
+                                           hover_color='dark green')
         plus_script_button.grid(row=len(self.scripts)//6, column=len(self.scripts) % 6, sticky="nsew", padx=10, pady=10)
 
         if len(self.scripts) < 6:
@@ -117,7 +118,8 @@ class ScriptTab:
         save_changes_button = ctk.CTkButton(button_frame, text="Zapisz zmiany", command=lambda: save_changes())
         save_changes_button.grid(row=2, column=0, sticky="nsew", padx=10, pady=10)
 
-        delete_button = ctk.CTkButton(button_frame, text="Usuń Skrypt", fg_color="red", command=lambda: delete_script())
+        delete_button = ctk.CTkButton(button_frame, text="Usuń Skrypt", fg_color="red", hover_color='dark red',
+                                      command=lambda: delete_script())
         delete_button.grid(row=3, column=0, sticky="nsew", padx=10, pady=10)
 
         def open_in_vscode():

@@ -111,7 +111,8 @@ class MainPage:
         drop.set(main_pack)
         drop.pack(padx=10, pady=5)
 
-        start_button = ctk.CTkButton(self.sidebar, text="Uruchom działanie w tle", height=50, fg_color='green')
+        start_button = ctk.CTkButton(self.sidebar, text="Uruchom działanie w tle", height=50, fg_color='green',
+                                     hover_color='dark green')
         start_button.pack(side=ctk.BOTTOM, pady=50)
 
 

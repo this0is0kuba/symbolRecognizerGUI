@@ -71,7 +71,7 @@ class SymbolTab:
             if len(self.symbols) < 6:
                 symbol_button.grid(pady=100)
 
-        plus_symbol_button = ctk.CTkButton(self.top_content, text="+", fg_color="green",
+        plus_symbol_button = ctk.CTkButton(self.top_content, text="+", fg_color="green", hover_color='dark green',
                                                 command=self.add_new_symbol)
         plus_symbol_button.grid(row=len(self.symbols) // 6, column=len(self.symbols) % 6, sticky="nsew", padx=10,
                                      pady=10)
@@ -169,7 +169,7 @@ class SymbolTab:
                                           , command=self.add_more_symbols)
         add_symbol_button.grid(row=3, column=0, sticky="nsew", padx=10, pady=10)
 
-        delete_button = ctk.CTkButton(button_frame, text="Usuń symbol", fg_color="red",
+        delete_button = ctk.CTkButton(button_frame, text="Usuń symbol", fg_color="red", hover_color='dark red',
                                       command=self.delete_symbol)
         delete_button.grid(row=4, column=0, sticky="nsew", padx=10, pady=10)
 
@@ -208,7 +208,7 @@ class SymbolTab:
     def add_new_symbol(self):
 
         top_level_add_symbol = ctk.CTkToplevel(self.root)
-        top_level_add_symbol.title("Nowy Skrypt")
+        top_level_add_symbol.title("Nowy Symbol")
         top_level_add_symbol.geometry("400x150")
 
         self.root.eval(f'tk::PlaceWindow {str(top_level_add_symbol)} center')

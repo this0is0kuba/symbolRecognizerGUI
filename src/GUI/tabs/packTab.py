@@ -59,7 +59,7 @@ class PackTab:
             if len(self.packs) < 6:
                 pack_button.grid(pady=100)
 
-        plus_pack_button = ctk.CTkButton(self.top_content, text="+", fg_color="green",
+        plus_pack_button = ctk.CTkButton(self.top_content, text="+", fg_color="green", hover_color='dark green',
                                          command=self.add_new_pack)
         plus_pack_button.grid(row=len(self.packs)//6, column=len(self.packs) % 6, sticky="nsew", padx=10, pady=10)
 
@@ -71,9 +71,41 @@ class PackTab:
 
         self.bottom_content = ctk.CTkFrame(self.root_bottom_content)
 
-        self.model_info = ctk.CTkTextbox(self.bottom_content)
+        self.bottom_content.columnconfigure(0, weight=8)
+        self.bottom_content.columnconfigure(1, weight=1)
+        self.bottom_content.rowconfigure(0, weight=1)
+
+        self.bottom_content.propagate(False)
+
+        self.set_config_buttons()
+
+        self.model_info = ctk.CTkTextbox(self.bottom_content, font=("Helvetica", 18))
         self.set_model_info()
-        self.model_info.pack(fill="both", expand=True)
+        self.model_info.grid(row=0, column=0, sticky='nsew')
+
+    def set_config_buttons(self):
+
+        button_frame = ctk.CTkFrame(self.bottom_content)
+        button_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
+
+        button_frame.columnconfigure(0, weight=1)
+        button_frame.rowconfigure(0, weight=5)
+        button_frame.rowconfigure(1, weight=1)
+
+        refresh_button = ctk.CTkButton(button_frame, text="Odśwież", command=self.refresh)
+        refresh_button.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+
+        delete_button = ctk.CTkButton(button_frame, text="Usuń Pakiet", fg_color="red", hover_color='dark red',
+                                      command=lambda: delete_pack())
+        delete_button.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+
+        def delete_pack():
+
+            os.remove(self.directory + "/" + self.selected_pack + ".h5")
+            os.remove(self.directory_with_info + "/" + self.selected_pack + ".json")
+
+            self.refresh()
+
 
     def find_script(self, symbol_name):
 
@@ -94,7 +126,7 @@ class PackTab:
 
         for i in range(len(all_symbols)):
 
-            info += "\n\n\t* " + all_symbols[i] + ":\t\t" + all_scripts[i]
+            info += "\n\n\t \u25CF " + all_symbols[i] + ":\t\t" + all_scripts[i]
 
         self.model_info.insert(ctk.END, info)
         self.model_info.configure(state=ctk.DISABLED)
@@ -139,9 +171,9 @@ class PackTab:
 
             check_box.pack(padx=10, pady=10)
 
-        submit = ctk.CTkButton(top_level_add_pack, command=lambda: self.create_new_pack(variables,
-                                                                                        entry_script_name.get(),
-                                                                                        top_level_add_pack))
+        submit = ctk.CTkButton(top_level_add_pack, text="Zatwierdź",
+                               command=lambda: self.create_new_pack(variables, entry_script_name.get(),
+                                                                    top_level_add_pack))
         submit.pack(padx=10, pady=50)
 
         top_level_add_pack.attributes('-topmost', 'true')
