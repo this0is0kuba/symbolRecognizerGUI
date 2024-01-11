@@ -3,6 +3,8 @@ import os
 import math
 import json
 
+from src.classification.classifier import train_model
+
 
 class PackTab:
 
@@ -12,14 +14,16 @@ class PackTab:
         self.root_top_content = top_content
         self.root_bottom_content = bottom_content
 
-        self.top_content = None
-        self.bottom_content = None
+        self.top_content: ctk.CTkFrame | None = None
+        self.bottom_content: ctk.CTkFrame | None = None
         self.model_info: ctk.CTkTextbox | None = None
         self.selected_model = None
 
         self.directory = "../data/packs/models"
         self.directory_with_info = "../data/packs/modelsInfo"
-        self.directory_with_script_info = "../data/symbols/symbolsInfo"
+
+        self.directory_with_symbol_info = "../data/symbols/symbolsInfo"
+        self.directory_to_symbols = "../data/symbols/symbols"
 
         self.selected_pack = None
         self.packs = []
@@ -66,6 +70,8 @@ class PackTab:
         if len(self.packs) < 6:
             plus_pack_button.grid(pady=100)
 
+    def clear_top_content(self):
+        self.top_content.destroy()
 
     def set_bottom_content(self):
 
@@ -109,7 +115,7 @@ class PackTab:
 
     def find_script(self, symbol_name):
 
-        with open(self.directory_with_script_info + "/" + symbol_name + ".json", 'r') as file:
+        with open(self.directory_with_symbol_info + "/" + symbol_name + ".json", 'r') as file:
             the_script = json.load(file)["script"]
 
         return the_script
@@ -183,33 +189,42 @@ class PackTab:
         if new_pack_name == "":
             return
 
+        path_list = []
+        selected_symbols = []
+
         for var in variables:
             if var.get() != "":
-                print(var.get())
+
+                selected_symbols.append(var.get())
+                path_list.append(self.directory_to_symbols + "/" + var.get() + ".pkl")
+
+        model, index_to_label = train_model(path_list)
+        model.save(self.directory + "/" + new_pack_name + ".h5")
+
+        model_info = {
+            "symbols": selected_symbols,
+            "index_to_label": index_to_label
+        }
+
+        with open(self.directory_with_info + "/" + new_pack_name + ".json", 'w') as f:
+            json.dump(model_info, f)
 
         window.destroy()
         self.refresh()
 
     def refresh(self):
 
+        self.find_all_packs()
+        self.selected_pack = self.packs[0]
+
+        self.clear_top_content()
+        self.set_top_content()
+        self.top_content.pack(fill='both', expand=True, padx=10, pady=10)
+
         self.model_info.configure(state=ctk.NORMAL)
         self.model_info.delete('1.0', ctk.END)
 
         self.set_model_info()
-
-
-    # symbol_name = event.widget.get()
-    #
-    # with open(self.directory + "/" + symbol_name + ".pkl", "wb") as f:
-    #     pickle.dump([], f)
-    #
-    # with open(self.directory_with_info + "/" + symbol_name + ".json", "w") as f:
-    #     json.dump({
-    #         "amount": 0,
-    #         "script": "default.py"
-    #     }, f)
-    #
-    # self.refresh()
 
     def enable(self):
 
