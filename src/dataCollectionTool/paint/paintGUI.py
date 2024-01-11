@@ -3,10 +3,12 @@ from .parameters import Parameters, State
 from .editor import process_image
 from .editor import find_magic_points
 import os
-import re
+import numpy as np
 import pickle
 import json
 import matplotlib.pyplot as plt
+
+from ...transformation.dataOperations import transform_img
 
 
 class PaintGUI:
@@ -177,15 +179,19 @@ class PaintGUI:
                 return
 
             np_img = process_image(self.info_about_photo, self.image_size, Parameters.RADIUS)
+            transformed_images = transform_img(np_img)
 
-            self.images.append((self.symbol_name, np_img))
+            self.images.append((self.symbol_name, np.clip(np.img, 0, 255)))
+
+            for t_img in transformed_images:
+                self.images.append((self.symbol_name, np.clip(t_img, 0, 255)))
 
             self.cnv.delete("all")
             self.index = 0
             self.info_about_photo = []
             self.previous_event = None
             self.restart_image_size()
-            self.number_of_unsaved_photos += 1
+            self.number_of_unsaved_photos += 11
             self.footer_info.configure(text="Unsaved images: " + str(self.number_of_unsaved_photos), fg="red")
             print("image has been added")
 

@@ -86,7 +86,10 @@ class PackTab:
         self.set_config_buttons()
 
         self.model_info = ctk.CTkTextbox(self.bottom_content, font=("Helvetica", 18))
-        self.set_model_info()
+
+        if self.selected_pack is not None:
+            self.set_model_info()
+
         self.model_info.grid(row=0, column=0, sticky='nsew')
 
     def set_config_buttons(self):
@@ -166,7 +169,7 @@ class PackTab:
         entry_script_name = ctk.CTkEntry(top_level_add_pack, placeholder_text="np. moj_pakiet")
         entry_script_name.pack(padx=10, pady=10)
 
-        all_symbols = self.find_model_info()["symbols"]
+        all_symbols = self.find_all_symbols()
         variables = []
 
         for symbol in all_symbols:
@@ -183,6 +186,14 @@ class PackTab:
         submit.pack(padx=10, pady=50)
 
         top_level_add_pack.attributes('-topmost', 'true')
+
+    def find_all_symbols(self):
+
+        if os.path.isdir(self.directory_to_symbols):
+            return [symbol.split(".")[0] for symbol in os.listdir(self.directory_to_symbols)]
+        else:
+            return []
+
 
     def create_new_pack(self, variables, new_pack_name,  window: ctk.CTkToplevel):
 
@@ -215,7 +226,11 @@ class PackTab:
     def refresh(self):
 
         self.find_all_packs()
-        self.selected_pack = self.packs[0]
+
+        if len(self.packs) > 0:
+            self.selected_pack = self.packs[0]
+        else:
+            self.selected_pack = None
 
         self.clear_top_content()
         self.set_top_content()
@@ -224,7 +239,8 @@ class PackTab:
         self.model_info.configure(state=ctk.NORMAL)
         self.model_info.delete('1.0', ctk.END)
 
-        self.set_model_info()
+        if self.selected_pack is not None:
+            self.set_model_info()
 
     def enable(self):
 

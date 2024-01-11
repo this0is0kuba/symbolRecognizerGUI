@@ -6,6 +6,8 @@ from src.GUI.tabs.packTab import PackTab
 from src.GUI.tabs.scriptTab import ScriptTab
 from src.GUI.tabs.symbolTab import SymbolTab
 from src.GUI.tabs.tabs import Tab
+from src.cursorDetection.tracking import tracking
+import threading
 
 
 class MainPage:
@@ -21,9 +23,9 @@ class MainPage:
         ctk.set_default_color_theme('dark-blue')
 
         # root parts:
-        self.main_page = None
-        self.sidebar = None
-        self.main_content = None
+        self.main_page: ctk.CTkFrame | None = None
+        self.sidebar: ctk.CTkFrame | None = None
+        self.main_content: ctk.CTkFrame | None = None
         self.script_configurator_button = None
         self.symbol_configurator_button = None
         self.package_configurator_button = None
@@ -43,6 +45,9 @@ class MainPage:
 
         # functional parts
         self.current_tab_name = Tab.SCRIPT_TAB
+        self.is_started = False
+        self.exit_event: threading.Event | None = None
+        self.my_thread: threading.Thread | None = None
 
     def set_content(self):
 
@@ -51,6 +56,9 @@ class MainPage:
 
         self.set_sidebar()
         self.set_main_content()
+
+    def clear_content(self):
+        self.main_page.destroy()
 
     def set_sidebar(self):
 
@@ -111,11 +119,12 @@ class MainPage:
         drop.set(main_pack)
         drop.pack(padx=10, pady=5)
 
+        refresh_button = ctk.CTkButton(self.sidebar, text="Odśwież", command=self.refresh)
+        refresh_button.pack(pady=(30, 5), padx=5)
+
         start_button = ctk.CTkButton(self.sidebar, text="Uruchom działanie w tle", height=50, fg_color='green',
-                                     hover_color='dark green')
-        start_button.pack(side=ctk.BOTTOM, pady=50)
-
-
+                                     hover_color='dark green', command=self.start_track)
+        start_button.pack(side=ctk.BOTTOM, pady=(0, 50))
 
     def find_main_pack(self):
 
@@ -143,6 +152,11 @@ class MainPage:
         self.pack_tab = PackTab(self.top_content, self.bottom_content, self.root)
 
         self.script_tab.enable()
+
+    def refresh(self):
+        self.clear_content()
+        self.set_content()
+
 
     def switch_tab(self, new_tab):
 
@@ -173,6 +187,29 @@ class MainPage:
             case Tab.PACK_TAB:
                 self.pack_tab.enable()
                 self.current_tab_name = Tab.PACK_TAB
+
+    def start_track(self):
+
+        if not self.is_started:
+
+            self.is_started = True
+
+            stop_button = ctk.CTkButton(self.sidebar, text="Zakończ działanie w tle", height=50, fg_color='red',
+                                         hover_color='dark red', command=lambda: self.stop_track(stop_button))
+            stop_button.pack(side=ctk.BOTTOM, pady=10)
+
+            self.exit_event = threading.Event()
+            self.my_thread = threading.Thread(target=lambda: tracking(self.exit_event), name="track")
+            self.my_thread.start()
+
+    def stop_track(self, stop_button):
+
+        self.exit_event.set()
+        self.my_thread.join()
+
+        stop_button.destroy()
+        self.is_started = False
+
 
     def start_app(self):
         self.root.mainloop()
