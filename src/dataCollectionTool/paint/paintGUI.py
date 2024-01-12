@@ -181,7 +181,7 @@ class PaintGUI:
             np_img = process_image(self.info_about_photo, self.image_size, Parameters.RADIUS)
             transformed_images = transform_img(np_img)
 
-            self.images.append((self.symbol_name, np.clip(np.img, 0, 255)))
+            self.images.append((self.symbol_name, np.clip(np_img, 0, 255)))
 
             for t_img in transformed_images:
                 self.images.append((self.symbol_name, np.clip(t_img, 0, 255)))
@@ -204,11 +204,12 @@ class PaintGUI:
             print("there is no images to undo")
             return
 
-        self.images.pop()
+        for i in range(11):
+            self.images.pop()
 
-        self.number_of_unsaved_photos -= 1
+        self.number_of_unsaved_photos -= 11
         self.footer_info.configure(text="Unsaved images: " + str(self.number_of_unsaved_photos), fg="red")
-        print("image has been deleted")
+        print("image and its transformed versions have been deleted")
 
     def image_exits(self):
 

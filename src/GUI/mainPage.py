@@ -155,6 +155,7 @@ class MainPage:
 
     def refresh(self):
         self.clear_content()
+        self.current_tab_name = Tab.SCRIPT_TAB
         self.set_content()
 
 
