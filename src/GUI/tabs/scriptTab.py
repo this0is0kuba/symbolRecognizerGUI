@@ -127,8 +127,9 @@ class ScriptTab:
             if platform == "win32":
                 subprocess.run("code " + self.directory + "/" + self.selected_script, shell=True)
 
-            elif platform == "darwin":
+            elif platform == "darwin" or platform == "linux":
                 subprocess.run("code " + self.directory + "/" + self.selected_script)
+
 
         def save_changes():
 
