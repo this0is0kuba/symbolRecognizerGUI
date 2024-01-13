@@ -55,7 +55,7 @@ def tracking(exit_event: threading.Event):
             i = 0
             pos_list = []
 
-        time.sleep(0.0005)
+        time.sleep(0.0001)
 
 
 def execute_script(pos_list, image_size):
