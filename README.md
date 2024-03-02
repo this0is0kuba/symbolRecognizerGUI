@@ -11,9 +11,9 @@ User can create new pack and neural netowrks by selecting the appropriate symbol
 ### There are three tabs: scripts, symbols and packets
 
 <div>
-  <img src="images/scripts.png" width="290"> 
-  <img src="images/packets.png" width="290"> 
-  <img src="images/symbols.png" width="325">
+  <img src="images/scripts.png" width="250"> 
+  <img src="images/packets.png" width="250"> 
+  <img src="images/symbols.png" width="280">
 </div>
 
 ### New Packet tab
