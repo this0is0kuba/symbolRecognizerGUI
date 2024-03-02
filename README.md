@@ -4,7 +4,7 @@ Desktop application which allows users to create assosiated symbols with their s
 ## Description
 Using mouse user can draw a symbol on the screen and program analize the symbol using neural netowrk. Then it predicts what kind of symbol it is and it runs the assosiated script.
 Ther is a GUI which allows users easly create new symbols, scripts and packs (groups of symbols). The pack has its own neural netowrk which is accitvated after run monitoring the mouse coursor.
-User can create new pack and neural netowrks by selecting the appropriate symbols. You can check the full documentation [here](documentaion.pdf).
+User can create new pack and neural netowrks by selecting the appropriate symbols. You can check the full documentation [here](documentation.pdf).
 
 ## GUI
 
