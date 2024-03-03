@@ -12,7 +12,7 @@ User can create new package and neural netowrks by selecting the appropriate sym
 
 |                                           |                                            |                                          |
 | ----------------------------------------- |--------------------------------------------|------------------------------------------|
-|<img src="images/scripts.png" width="250">  | <img src="images/packets.png" width="250">  | <img src="images/symbols.png" width="280"> |
+|<img src="images/scripts.png">  | <img src="images/packets.png">  | <img src="images/symbols.png"> |
 
 ### New Package tab
 
